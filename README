@@ -1,0 +1,152 @@
+README
+=======
+
+These are OpenTox plugin installation instructions for Debian, Ubuntu and Redhat Enterprise Linux.
+
+IMPORTANT! Execute all below commands as superuser (root) from the RAILS_ROOT directory.
+
+Contents:
+=========
+I) Installing an OpenTox application
+II) OpenTox output format (YAML)
+
+
+
+I) Installing an OpenTox application
+====================================
+
+1. Install dependencies  (DISTRIBUTION-SPECIFIC):
+
+    NAME		    DESCRIPTION
+    ----		    -----------
+    build-essential (Compiler etc.)
+    rubygems	    (Ruby extensions (gems))
+    java-jdk        (Calculate images of molecules and fragments)
+    libsqlite3-dev  (Database driver)
+    sqlite3
+    r-base          (R/Bioconductor)
+    rdoc            (Rubygems)
+    sysutils        
+
+    Debian:
+    -------
+    ~# apt-get install build-essential java-jdk sun-java6-jre sun-java6-plugin sun-java6-fonts libsqlite3-dev r-base r-base-dev rdoc rubygems sqlite3 sysutils 
+
+    Ubuntu:
+    ------- 
+    ~# apt-get install build-essential sun-java6-jdk sun-java6-jre sun-java6-plugin sun-java6-fonts libsqlite3-dev r-base r-base-dev rdoc rubygems sqlite3 sysutils 
+    
+    Redhat Enterprise Linux:
+    ------------------------
+    Go to Applications->Add/Remove Software. Install the following packages: sqlite, sqlite-devel. 
+    Install R from http://cran.r-project.org/bin/linux/redhat/. 
+    Get Java Development Kit from http://java.sun.com/javase/downloads/index.jsp. Choose the self-extracting archive. Uncompress to a directory of your choice. 
+
+
+2. Install required gems:
+
+    NAME                DESCRIPTION
+    ----	        -----------
+    mechanize           (includes hpricot)
+    rake
+    rino
+    rjb                 (ruby-java-bridge: do NOT use 1.1.0 - it will segfault (at least on Debian etch))
+    rsruby              (ruby connector to R)
+    sqlite3-ruby        (sqlite3-connector: use 1.0.0 on Redhat Enterprise Linux 5.1)
+    statarray
+    xml-simple
+
+    Instructions:
+    -------------
+    set $LD_LIBRARY_PATH for rjb (see http://rjb.rubyforge.org/) and
+    set $R_HOME for rsruby       (see http://web.kuicr.kyoto-u.ac.jp/~alexg/rsruby/),
+
+    by executing e.g.:
+
+    ~# export JAVA_HOME="/usr/lib/jvm/java-6-sun"
+    ~# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client
+    ~# export R_HOME="/usr/lib/R"
+
+    Hint: add these lines to your ~/.bashrc to make the changes permanent. 
+
+    Install gems:
+
+    ~# gem install -y mechanize rake rino rjb sqlite3-ruby statarray xml-simple rsruby -- --with-R-dir=/usr/lib/R --with-R-include=/usr/share/R/include 
+
+    CAUTION: Use gem install -y sqlite3-ruby --version=1.0.0 for Redhat Enterprise Linux. If, by accident, you installed a higher version first remove the respective directory under e.g. /usr/lib/ruby/gems/1.8/gems/, depending on your installation.
+    CAUTION: We experienced problems on Ubuntu 7.04 (Feisty Fawn) with ruby 1.8.5 repository version. Had to install ruby 1.8.6 and rubygems 0.9.4 manually.
+    CAUTION: Do not run gem update --system on Debian (Ubuntu) based systems. All gems will disappear after that.
+
+
+3. Update the system configuration:
+
+    ~# rake opentox:config_libs
+    ~# /sbin/ldconfig
+
+4. Compile programs
+
+    set JAVA_HOME in config/java.rb (eg. /usr/lib/jvm/java-1.6.0-sun). Verify with 'which javac' that the java compiler points to the latest version (otherwise change the $PATH environment variable accordingly).
+    ~# rake opentox:compile_java
+
+4. Get additional data and plugins
+
+    edit config/svn.yaml
+    ~# rake svn:up
+
+    go to the new plugins in vendor/plugins and follow the installation instructions
+
+5. Load database schema
+
+    ~# rake db:schema:load
+
+6. Start the server
+
+    development: 
+    ~# script/server
+
+    production:
+    ~# gem install mongrel
+
+    install libapache2-mod-proxy-html.
+    enable proxies in apache:
+    ~# a2enmod proxy
+    ~# a2enmod proxy_http
+    ~# a2enmod headers
+
+    configure apache (in /etc/apache2/sites-available/):
+
+    <VirtualHost *:80>
+        # proxy requests to mongrel
+        ProxyPass / http://myserver:8000/
+        ProxyPassReverse / http://myserver:8000/
+        ProxyPreserveHost on
+    </VirtualHost>
+
+    TODO: Apache configuration and iptables for https access
+
+    set JAVA_HOME and LD_LIBRARY_PATH before starting mongrel
+
+    ~# export LD_LIBRARY_PATH=/usr/local/lib
+    ~# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JAVA_HOME/jre/lib/i386:$JAVA_HOME/jre/lib/i386/client
+
+    ~# mongrel_rails start -p 8000 -e production
+
+7. Browse to
+
+    http://localhost:3000 (development)
+    http://myserver (production)
+
+
+II) OpenTox output format (YAML)
+================================
+
+    Every opentox plugin must adhere to the following YAML syntax for predictions:
+
+    ---
+    id: '<id>'
+    prediction: '<prediction>'
+    confidence: '<confidence>'
+    <...>
+
+    where <id> is an alphanumeric identifier, <prediction> and <confidence> are either discrete or continuous values, depending on the prediction type (classification or regression).
+    <...> denotes additional information.

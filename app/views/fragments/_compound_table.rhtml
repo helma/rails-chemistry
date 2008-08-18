@@ -1,0 +1,29 @@
+<% page = @category + "_page" %>
+<table>
+  <tr>
+    <th colspan="2">
+      <%= @matches[@category].size %> from <%= @total_nr[@category] %> <%= @category.sub(/s$/,'') %> compounds
+    </th>
+
+    <th>
+      <%= link_to "prev", :action => :search, page => session[:page][@category]["prev"], :endpoint_id => params[:endpoint_id], :smarts => @smarts unless session[:page][@category]["nr"] == 0 %>
+      <%= session[:page][@category]["nr"]+1 %>/<%= session[:page][@category]["nr_pages"]+1 %>
+      <%= link_to "next", :action => :search, page => session[:page][@category]["next"], :endpoint_id => params[:endpoint_id], :smarts => @smarts unless session[:page][@category]["next"] > session[:page][@category]["nr_pages"] %>
+  </th>
+
+  </tr>
+  <% i = session[:page][@category]["start"] %>
+  <% 3.times do %>
+  <tr>
+    <% 3.times do %>
+    <td>
+      <% if i < @matches[@category].size && @matches[@category][i] %>
+      <%= display_smiles_with_fragments(@matches[@category][i][1],[],[],[],[],[@smarts]) %>
+      <% i += 1 %>
+      <% end %>
+    </td>
+    <% end %>
+  </tr>
+  <% end %>
+</table>
+

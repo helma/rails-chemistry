@@ -1,0 +1,14 @@
+<tr><th colspan=2><h5><%= experiment.title %></h5></th></tr>
+
+
+<% @record.generic_datas.each do |d| %>
+  <% if d.experiment == experiment %>
+  <tr>
+    <th><%= d.property.name %></th>
+    <td><%= d.value.value unless d.value.blank? %>
+      &nbsp;<%= d.unit.name  unless d.unit.blank?%>
+    </td>
+  </tr>
+  <% end %>
+<% end %>
+

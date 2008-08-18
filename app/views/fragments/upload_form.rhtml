@@ -1,0 +1,10 @@
+<div class='lazar-form'>
+
+  <% form_tag({:controller => 'fragments', :action => 'upload'}, {:multipart => true}) do %>
+  <ol>
+    <li>Upload a tab separated file with IDs, SMILES codes and activities (0/1):<p/><%= file_field_tag "file"%></li>
+    <li><%= submit_tag "Upload" %></li> 
+  </ol>
+  <% end %>
+
+</div>

@@ -1,0 +1,24 @@
+<div class='login'>
+	<%= flash[:notice] %>
+	<% form_tag do %>
+    <% if params[:workpackage_id] %>
+      <%= hidden_field_tag :workpackage_id, params[:workpackage_id] %>
+    <% end %>
+
+	<table>
+		<tr>
+			<th>User:</th>
+			<td><%= text_field_tag :name, params[:name] %></td>
+		</tr>
+		<tr>
+			<th>Password:</th>
+			<td><%= password_field_tag :password, params[:password] %></td>
+		</tr>
+		<tr>
+			<th><%= submit_tag "Login" %></th>
+		</tr>
+	</p>
+	</table>
+	<% end %>
+
+</div>

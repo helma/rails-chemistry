@@ -1,0 +1,18 @@
+<div class="active-scaffold">
+  <h1>Validation of CAS Numbers and Structures</h1>
+<table>
+  <tr>
+    <th>CAS</th>
+    <th>Name</th>
+    <th>Validation failure</th>
+  </tr>
+  <% @failed.each do |f| %>
+    <tr>
+      <% f[0..2].each do |i| %>
+        <td><%= i %></td>
+      <% end %>
+      <td><%= link_to "edit", :action => :edit, :id => f[3] %></td>
+    </tr>
+  <% end %>
+</table>
+</div>

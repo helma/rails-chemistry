@@ -1,0 +1,106 @@
+<div class="active-scaffold">
+ <div class="update-view view">
+    <ol class="form">
+      <% form_for :protocol, @protocol, :url => { :action => 'save', :id => @protocol.id} , :html => {:multipart => true} do |f| %>
+
+      <% unless params["parent_model"].blank? %>
+      <li class="form-element">
+      <dl>
+        <dt><label for="record-experiment">Experiment title</label></dt>
+        <dd><%= Experiment.find(session[:exp_id]).title %></dd>
+      </dl>
+      <%= hidden_field :experiment_id, session[:exp_id]  %>
+      </li>
+      <% end %>
+
+      <li class="form-element">
+      <dl>
+        <dt><label for="record-description">Description</label></dt>
+        <dd><%= f.text_area :description %></dd>
+      </dl>
+      </li><br/>
+      <li class="form-element">
+      <dl>
+        <dt><label for="record-workpackage">Workpackage</label></dt>
+        <dd><%= select(:protocol, :workpackage_id, Workpackage.find(:all).collect {|w| [ w.nr, w.nr ] }) %></dd>
+      </dl>
+      </li>
+      <% case @protocol.document_type
+      when "TextDocument" %>
+      <% fields_for :document, @protocol.document do |document_fields| %>
+      <li class="form-element">
+        <dl>
+          <dt> <label for="record_Name">Name</label> </dt>
+          <dd> <%= document_fields.text_field :name %> </dd>
+        </dl>
+      </li>
+      <li class="form-element">
+        <dl>
+          <dt> <label for="record_document">Text</label> </dt>
+          <dd> <%= document_fields.text_area :text %> </dd>
+        </dl>
+      </li>
+      <% end %>
+      <% when "Url" %>
+      <% fields_for :document, @protocol.document do |document_fields| %>
+      <li class="form-element">
+        <dl>
+          <dt> <label for="record_document">URL</label> </dt>
+          <dd> <%= document_fields.text_field :name  %> </dd>
+        </dl>
+      </li>
+      <% end %>
+      <% when "FileDocument" %>
+      <% fields_for :document, @protocol.document do |document_fields| %>
+      <li class="form-element">
+        <dl>
+          <dt> <label for="record_document">Replacement for <%= File.basename(@protocol.document.file) %></label> </dt>
+          <dd> <% @document = @protocol.document %> <%= file_column_field "document", "file", :class => "document-input text-input",:id => "record_file"%> </dd>
+        </dl>
+      </li>
+      <% end %>
+      <% when nil %>
+        <p/><hr/>
+      <% fields_for :document, @protocol.document do |document_fields| %>
+      <li class="form-element">
+        <dl>
+          <dt> <label for="record_document">Upload a file</label> </dt>
+          <dd> <% @document = @protocol.document %> <%= file_column_field "document", "file", :class => "document-input text-input",:id => "record_file"%> </dd>
+        </dl><p/>
+        <hr/>
+        <dl>
+          <dt> <label for="record_document"><em><b>or</b></em> enter name and text of the protocol</label></dt>
+          <dd>Name: <br/><%= document_fields.text_field :name %> <p/>
+          Text: <br/><%= document_fields.text_area :text %>
+            </dd>
+        </dl><p/>
+        <hr/>
+        <dl>
+          <dt> <label for="record_document"><em><b>or</b></em> provide a valid internet address (URL)</label></dt>
+          <dd> <%= document_fields.text_field :url  %> </dd>
+        </dl><p/>
+        <!--
+        <hr/>
+
+        <dl>
+          <dt> <label for="record_document"><em><b>or</b></em> enter a bibliographic reference</label></dt>
+          <dd> <%= document_fields.text_field :text  %> </dd>
+        </dl>
+        -->
+
+      </li>
+      <% end %>
+      <% end %>
+      </ol>
+      <p class="form-footer">
+        <%= submit_tag as_('Update'), :class => "submit" %>
+        <%= link_to as_('Cancel'), params_for(:action => 'list'), :class => 'cancel' %>
+        <%= loading_indicator_tag(:action => :update, :id => params[:id]) %>
+      </p>
+
+    <% end %>
+    <script type="text/javascript">
+    Form.focusFirstElement('<%= element_form_id(:action => :update) -%>');
+    </script>
+  </div>
+</div>

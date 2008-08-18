@@ -1,0 +1,62 @@
+<%
+gem 'rjb'
+require 'rjb'
+Rjb::load(classpath = './vendor/plugins/opentox/lib/java/:./vendor/plugins/opentox/lib/java/cdk-1.0.1.jar')
+
+if !params[:id].blank?
+  begin
+    sp = Rjb::import('org.openscience.cdk.smiles.SmilesParser').new
+    sdg = Rjb::import('org.openscience.cdk.layout.StructureDiagramGenerator').new
+    out = Rjb::import('java.io.ByteArrayOutputStream').new
+    writer = Rjb::import('org.openscience.cdk.io.MDLWriter').new(out)
+    mol = sp.parseSmiles(@record.smiles)
+    sdg.setMolecule(mol)
+    sdg.generateCoordinates()
+    mol = sdg.getMolecule();
+    writer.write(mol)
+    @molfile = out.toString
+    @molfile = @molfile.gsub(/\$+/,'').chomp.gsub(/\n/,"|\n")
+    load_smiles = true
+  rescue
+    #flash[:notice] = "Cannot process " + Compound.find(params[:id]).smiles + "!" unless Compound.find(params[:id]).blank?
+    load_smiles = false
+  end
+else
+  load_smiles = false
+end
+
+%>
+
+<script language="JavaScript">
+
+  function getsmiles() {
+    if (document.JME.smiles() != '')
+      $('record_smiles').value = document.JME.smiles() ;
+  }
+</script>
+
+<dl>
+  <dt>
+    <label for="record_smiles">Structure</label>
+  </dt>
+  <dd>
+    <%= flash[:notice] %>
+    <div class="jme">
+      <applet code="JME.class" name="JME" archive="/plugin_assets/opentox/applets/JME.jar" width=512 height=360>
+      <% if load_smiles %>
+      <param name="mol" value="<%= @molfile %>">
+      <% end %>
+      Please enable Java and JavaScript on your machine.
+      </applet><p/>
+    </div>
+  </dd>
+</dl>
+</li><li class="form-element ">
+<dl>
+  <dt>
+    <label for="record_smiles">Smiles</label>
+  </dt>
+  <dd>
+    <%= text_field :record, :smiles, :size => 60, :class => "smiles-input text-input",:id => "record_smiles"%>
+  </dd>
+</dl>
