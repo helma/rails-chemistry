@@ -1,19 +1,68 @@
 require 'find'
 require 'yaml'
 
-namespace :gem do
+namespace :openbabel do
 
-  desc "Install required gems"
-  task :install do
-   require 'config/java.rb'
-   require 'config/R.rb'
-   if (ENV['R_HOME'] && ENV['LD_LIBRARY_PATH'] && ENV['JAVA_HOME'])
-       sh "gem install rake sqlite3-ruby rino xml-simple mechanize rjb statarray haml"
-       sh "gem install rsruby -- --with-R-dir=#{ENV['R_HOME']} --with-R-include=#{ENV['R_INCLUDE']}"
-       sh "rake opentox:compile_java"
-   else
-       puts "ERROR: $R_HOME, $JAVA_HOME or $LD_LIBRARY_PATH not set. Could not install gems rjb and rsruby. Please change your settings in config/java.rb and config/R.rb "
-   end
+  path = RAILS_ROOT+"/vendor/lib/openbabel"
+  src = path + "/src"
+
+  task :checkout do
+    if File.directory?(src)
+      sh "cd #{src} && git pull"
+    else
+      FileUtils.mkdir_p(path) unless File.directory?(path)
+      sh "git clone http://opentox.org/git/ch/openbabel.git #{src}"
+      sh "cd #{src} && ./configure --prefix=#{path}"
+    end
+  end
+
+  # (Re)configure openbabel libraries
+  task :configure => "openbabel:checkout" do
+    #sh "cd #{src} && ./configure --prefix=#{path}"
+    sh "cd #{src} && ./config.status"
+  end
+
+  desc "Install/update openbabel libraries"
+  task :install => "openbabel:checkout" do
+    sh "cd #{src} && make install"
+    sh "cd #{src}/scripts/ruby && ruby extconf.rb --with-openbabel-dir=#{path}"
+    sh "cd #{src}/scripts/ruby && make && export DESTDIR=#{path} && make install"
+  end
+
+end
+
+namespace :R do
+
+  path = RAILS_ROOT+"/vendor/lib/R"
+  src = path + "/src"
+
+  task :checkout do
+    if File.directory?(src)
+      sh "cd #{src} && git pull"
+    else
+      FileUtils.mkdir_p(path) unless File.directory?(path)
+      sh "git clone http://opentox.org/git/ch/R.git #{src}"
+      sh "cd #{src} && ./configure --prefix=#{path} --enable-R-shlib"
+    end
+  end
+
+  # (Re)configure R libraries
+  task :configure => "R:checkout" do
+    sh "cd #{src} && ./configure --prefix=#{path} --enable-R-shlib"
+  end
+
+  task :compile => "R:checkout" do
+    sh "cd #{src} && make"
+  end
+
+  desc "Install/update R libraries"
+  task :install => "R:compile" do
+    sh "cd #{src} && make install rincludedir=#{path}/include/"
+  end
+
+  #task :kernlab => "R:install" do
+  task :kernlab do
+    sh "cd #{src} &&  #{path}/bin/R CMD INSTALL -l #{path}/lib kernlab_0.9-7.tar.gz"
   end
 
 end
@@ -22,76 +71,31 @@ namespace :opentox do
 
   desc "Compile java libraries"
   task :compile_java do
-    `cd vendor/plugins/opentox/lib/java; make`
+    sh "cd vendor/plugins/opentox/lib/java; make"
   end
 
-  desc "Configure LD_LIBRARY_PATH for OpenBabel"
-  task :config_libs do
-
-    require "rbconfig.rb"    
-    include Config
-
-    obsrcdir = RAILS_ROOT+"/vendor/plugins/opentox/lib/ob/"
-    obversion = "2.1.1"
-    sh "cd /tmp && tar xzvf #{obsrcdir}openbabel-"+obversion+"-ruby.tar.gz"
-    sh "cd /tmp/openbabel-"+obversion+" && ./configure && make && make install"
-    sh "cd /tmp/openbabel-"+obversion+"/scripts/ruby && ruby extconf.rb && make && make install"
-    libconfig = File.new("/etc/ld.so.conf", "a")
-    libdir = "/usr/local/lib"
-    libconfig.puts libdir
-
-    sh "ln -sf /usr/lib/R/lib/libRlapack.so /usr/lib/R/"
-    sh "ln -sf /usr/lib/R/lib/libR.so /usr/lib/R/"
-    libconfig = File.new("/etc/ld.so.conf", "a")
-    libdir = "/usr/lib/R/"
-    libconfig.puts libdir
-
-    puts "-----------------------------------"
-    puts "Please run '/sbin/ldconfig' as root"
-    puts "-----------------------------------"
-
+  desc "Install opentox plugin with libraries"
+  task :install => ["R:install", "openbabel:install", "opentox:compile_java"] do
+    sh "rake db:schema:load"
   end
 
-  namespace :install do
+end
 
-    desc "Install base packages"
-    task :base do 
-       sh "apt-get update"
-       sh "apt-get install irb"
-       sh "rake svn:up"
-    end
+namespace :debian do
 
+  desc "Install debian packages for the compilation of libraries and external programs" 
+  task :prepare do
+     sh "sudo apt-get install sqlite3 java-jdk libsqlite3-dev sysutils ruby rdoc ruby1.8-dev libblas-dev liblapack-dev"
+  end
 
-    desc "Install opentox packages for Debian"
-    task :debian => :base do
-       sh "apt-get install sqlite3 java-jdk libsqlite3-dev r-base r-base-dev sysutils rdoc"
-       sh "ln -sf /usr/lib/R/lib/libRlapack.so /usr/lib/R/"
-       sh "ln -sf /usr/lib/R/lib/libR.so /usr/lib/R/"
-       #require 'config/java.rb'
-       #if (ENV['R_HOME'] && ENV['LD_LIBRARY_PATH'])
-       #    sh "gem install -y rake sqlite3-ruby rino xml-simple mechanize rjb statarray rsruby -- --with-R-dir=$R_HOME"
-       #    sh "rake opentox:compile_java"
-       #else
-       #    puts "ERROR: $R_HOME or $LD_LIBRARY_PATH not set. Could not install gems rjb and rsruby (see OpenTox README)."
-       #end
-       sh "rake db:schema:load"
-    end
+end
 
-    desc "Install opentox packages for Ubuntu"
-    task :ubuntu => :base do 
-       sh "apt-get -y install sqlite3 sun-java6-jdk libsqlite3-dev ruby r-base sysutils rdoc ruby1.8-dev"
-       sh "ln -sf /usr/lib/R/lib/libRlapack.so /usr/lib/R/"
-       sh "ln -sf /usr/lib/R/lib/libR.so /usr/lib/R/"
-       #require 'config/java.rb'
-       #if (ENV['R_HOME'] && ENV['LD_LIBRARY_PATH'])
-       #    sh "gem install -y rake sqlite3-ruby rino xml-simple mechanize rjb statarray rsruby -- --with-R-dir=$R_HOME"
-       #    sh "rake opentox:compile_java"
-       #else
-       #    puts "ERROR: $R_HOME or $LD_LIBRARY_PATH not set. Could not install gems rjb and rsruby (see OpenTox README)."
-       #end
-       sh "rake db:schema:load"
-    end
+namespace :ubuntu do
 
+  desc "Install ubuntu packages for the compilation of libraries and external programs" 
+  task :prepare do
+     sh "sudo apt-get install sqlite3 java-jdk libsqlite3-dev sysutils rdoc"
+     sh "sudo apt-get install sqlite3 sun-java6-jdk libsqlite3-dev sysutils ruby rdoc ruby1.8-dev libblas-dev liblapack-dev"
   end
 
 end
