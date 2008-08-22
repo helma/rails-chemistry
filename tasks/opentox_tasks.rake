@@ -55,15 +55,17 @@ namespace :R do
     sh "cd #{src} && make"
   end
 
-  desc "Install/update R libraries"
-  task :install => "R:compile" do
+  task :base => "R:compile" do
     sh "cd #{src} && make install rincludedir=#{path}/include/"
   end
 
   #task :kernlab => "R:install" do
-  task :kernlab do
-    sh "cd #{src} &&  #{path}/bin/R CMD INSTALL -l #{path}/lib kernlab_0.9-7.tar.gz"
+  task :kernlab => "R:base" do
+    sh "export R_HOME=#{path}/lib/R && cd #{src} &&  #{path}/bin/R CMD INSTALL kernlab_0.9-7.tar.gz"
   end
+
+  desc "Install/update R libraries"
+  task :install => "R:kernlab"
 
 end
 
