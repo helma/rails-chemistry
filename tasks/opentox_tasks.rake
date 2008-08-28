@@ -1,6 +1,21 @@
 require 'find'
 require 'yaml'
 
+namespace :R do
+
+  path = RAILS_ROOT+"/vendor/lib/R"
+  r = RAILS_ROOT+"/vendor/bin/R"
+
+  namespace :install do
+
+    desc "install the kernlab package"
+    task :kernlab do
+      sh "export R_HOME=#{path}/lib/R &&  #{r} CMD INSTALL http://cran.r-project.org/src/contrib/Archive/kernlab/kernlab_0.9-7.tar.gz"
+    end
+  end
+end
+
+=begin
 namespace :openbabel do
 
   path = RAILS_ROOT+"/vendor/lib/openbabel"
@@ -68,6 +83,7 @@ namespace :R do
   task :install => "R:kernlab"
 
 end
+=end
 
 namespace :opentox do
 
@@ -77,12 +93,14 @@ namespace :opentox do
   end
 
   desc "Install opentox plugin with libraries"
-  task :install => ["R:install", "openbabel:install", "opentox:compile_java"] do
+  #task :install => ["R:install", "openbabel:install", "opentox:compile_java"] do
+  task :install => ["opentox:compile_java"] do
     sh "rake db:schema:load"
   end
 
 end
 
+=begin
 namespace :debian do
 
   desc "Install debian packages for the compilation of libraries and external programs" 
@@ -101,6 +119,7 @@ namespace :ubuntu do
   end
 
 end
+=end
   
 =begin
 namespace :db do
