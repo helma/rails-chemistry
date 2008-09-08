@@ -1,90 +1,6 @@
 require 'find'
 require 'yaml'
 
-namespace :R do
-
-  path = RAILS_ROOT+"/vendor/lib/R"
-  r = RAILS_ROOT+"/vendor/bin/R"
-
-  namespace :install do
-
-    desc "install the kernlab package"
-    task :kernlab do
-      sh "export R_HOME=#{path}/lib/R &&  #{r} CMD INSTALL http://cran.r-project.org/src/contrib/Archive/kernlab/kernlab_0.9-7.tar.gz"
-    end
-  end
-end
-
-=begin
-namespace :openbabel do
-
-  path = RAILS_ROOT+"/vendor/lib/openbabel"
-  src = path + "/src"
-
-  task :checkout do
-    if File.directory?(src)
-      sh "cd #{src} && git pull"
-    else
-      FileUtils.mkdir_p(path) unless File.directory?(path)
-      sh "git clone http://opentox.org/git/ch/openbabel.git #{src}"
-      sh "cd #{src} && ./configure --prefix=#{path}"
-    end
-  end
-
-  # (Re)configure openbabel libraries
-  task :configure => "openbabel:checkout" do
-    #sh "cd #{src} && ./configure --prefix=#{path}"
-    sh "cd #{src} && ./config.status"
-  end
-
-  desc "Install/update openbabel libraries"
-  task :install => "openbabel:checkout" do
-    sh "cd #{src} && make install"
-    sh "cd #{src}/scripts/ruby && ruby extconf.rb --with-openbabel-dir=#{path}"
-    sh "cd #{src}/scripts/ruby && make && export DESTDIR=#{path} && make install"
-  end
-
-end
-
-namespace :R do
-
-  path = RAILS_ROOT+"/vendor/lib/R"
-  src = path + "/src"
-
-  task :checkout do
-    if File.directory?(src)
-      sh "cd #{src} && git pull"
-    else
-      FileUtils.mkdir_p(path) unless File.directory?(path)
-      sh "git clone http://opentox.org/git/ch/R.git #{src}"
-      sh "cd #{src} && ./configure --prefix=#{path} --enable-R-shlib"
-    end
-  end
-
-  # (Re)configure R libraries
-  task :configure => "R:checkout" do
-    sh "cd #{src} && ./configure --prefix=#{path} --enable-R-shlib"
-  end
-
-  task :compile => "R:checkout" do
-    sh "cd #{src} && make"
-  end
-
-  task :base => "R:compile" do
-    sh "cd #{src} && make install rincludedir=#{path}/include/"
-  end
-
-  #task :kernlab => "R:install" do
-  task :kernlab => "R:base" do
-    sh "export R_HOME=#{path}/lib/R && cd #{src} &&  #{path}/bin/R CMD INSTALL kernlab_0.9-7.tar.gz"
-  end
-
-  desc "Install/update R libraries"
-  task :install => "R:kernlab"
-
-end
-=end
-
 namespace :opentox do
 
   desc "Compile java libraries"
@@ -92,54 +8,12 @@ namespace :opentox do
     sh "cd vendor/plugins/opentox/lib/java; make"
   end
 
-  desc "Install opentox plugin with libraries"
-  #task :install => ["R:install", "openbabel:install", "opentox:compile_java"] do
+  desc "Install opentox plugin"
   task :install => ["opentox:compile_java"] do
     sh "rake db:schema:load"
   end
 
 end
-
-=begin
-namespace :debian do
-
-  desc "Install debian packages for the compilation of libraries and external programs" 
-  task :prepare do
-     sh "sudo apt-get install sqlite3 java-jdk libsqlite3-dev sysutils ruby rdoc ruby1.8-dev libblas-dev liblapack-dev"
-  end
-
-end
-
-namespace :ubuntu do
-
-  desc "Install ubuntu packages for the compilation of libraries and external programs" 
-  task :prepare do
-     sh "sudo apt-get install sqlite3 java-jdk libsqlite3-dev sysutils rdoc"
-     sh "sudo apt-get install sqlite3 sun-java6-jdk libsqlite3-dev sysutils ruby rdoc ruby1.8-dev libblas-dev liblapack-dev"
-  end
-
-end
-=end
-  
-=begin
-namespace :db do
-  namespace :production do
-    desc "Backup production database"
-    task :backup do
-      t = Time.now
-      FileUtils.cp('db/production.sqlite3','db/production.'+t.year.to_s+t.month.to_s+t.day.to_s)
-    end
-  end
-
-  namespace :development do
-    desc "Sync development database with production database"
-    task :sync do
-      FileUtils.cp('db/production.sqlite3','db/development.sqlite3')
-    end
-  end
-
-end
-=end
 
 namespace :affy do
 
