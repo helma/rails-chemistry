@@ -172,6 +172,32 @@ li#sel a {
   visibility: hidden;
 }
 
+.smarts_form table {
+
+  clear: both;
+  background-color: #B9DCFF;
+}
+
+.smarts_form th {
+  padding: 5px;
+  background-color: #B9DCFF;
+  color: black;
+  text-align: right;
+}
+
+.smarts_form th a {
+  color: black;
+  text-decoration: underline;
+}
+
+.smarts_form td {
+  padding: 5px;
+  background-color: #B9DCFF;
+  text-align: center;
+  overflow: auto;
+}
+
+
 .smarts_entry {
   clear: both;
   display: inline;
@@ -300,7 +326,10 @@ td.sim40 { background-color: #444; }
 td.sim30 { background-color: #222; }
 
 .fragment_results {
+	width: 100%;
+  height: 100%;
   display: inline;
+  clear: both;
 }
 
 .active_compounds {
@@ -314,6 +343,8 @@ td.sim30 { background-color: #222; }
 .warnings {
   clear: both;
 }
+
+
 
 /* fix scaffold display in IE, added by AM */
 #compounds-content {

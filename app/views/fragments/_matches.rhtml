@@ -19,24 +19,18 @@
 </div>
 <p/>
 
-<div class="fragment_results">
+<table>
+  <tr>
+    <td>
+<% @category = "actives" %>
+<%= render :partial => "compound_table" %>
+    </td>
 
-  <div class="active_compounds">
-    <% @category = "actives" %>
-    <%= render :partial => "compound_table" %>
-  </div>
 
-  <div class="inactive_compounds">
-    <% @category = "inactives" %>
-    <%= render :partial => "compound_table" %>
-  </div>
+    <td>
+<% @category = "inactives" %>
+<%= render :partial => "compound_table" %>
+    </td>
+  </tr>
+</table>
 
-</div>
-
-<p/>
-<div class="warnings">
-<!--
-  <h2>Warnings:</h2>
-  <%#= flash[:warning] %><p/>
--->
-</div>
