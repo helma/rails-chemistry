@@ -16,7 +16,7 @@ import org.openscience.cdk.renderer.Renderer2D;
 import org.openscience.cdk.renderer.Renderer2DModel;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
-import org.openscience.cdk.smiles.smarts.SMARTSParser;
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
 import org.openscience.cdk.graph.ConnectivityChecker;
 
 import javax.swing.*;
@@ -386,13 +386,13 @@ public class DisplayStructure {
 			r2dm.setDrawNumbers(false);
 			r2dm.setUseAntiAliasing(true);
 			r2dm.setShowImplicitHydrogens(true);
-			r2dm.setShowAromaticityInCDKStyle(true);
+			r2dm.setShowAromaticity(true);
+			//r2dm.setShowAromaticityInCDKStyle(true);
 			r2dm.setColorAtomsByType(true);
-			r2dm.setShowAtomTypeNames(true);
+			r2dm.setShowAtomTypeNames(false);
 			r2dm.setBackColor(Color.white);
 			r2dm.setFont(new Font("SansSerif", Font.BOLD, 10));
 			r2dm.setBackgroundDimension(new Dimension(size,size));
-			//r2dm.setIsCompact(false);
 			r2dm.setBondDistance(2*r2dm.getBondWidth());
 
 		} catch (Exception exc) {

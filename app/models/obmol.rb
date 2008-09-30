@@ -36,4 +36,8 @@ class Obmol
     logP.predict(@mol)
   end
 
+  def molecular_weight
+    @mol.get_mol_wt
+  end
+
 end
