@@ -10,7 +10,7 @@ namespace :opentox do
 
   desc "Install opentox plugin"
   task :install => ["opentox:compile_java"] do
-    sh "rake db:schema:load"
+    #sh "rake db:schema:load"
   end
 
 end
