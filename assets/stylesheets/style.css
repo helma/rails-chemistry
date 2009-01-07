@@ -321,9 +321,18 @@ td.sim90 { background-color: #ddd; }
 td.sim80 { background-color: #ccc; }
 td.sim70 { background-color: #aaa; }
 td.sim60 { background-color: #888; }
-td.sim50 { background-color: #666; }
-td.sim40 { background-color: #444; }
-td.sim30 { background-color: #222; }
+td.sim50 {
+	background-color: #666;
+	color: lightgrey;
+}
+td.sim40 {
+	background-color: #444;
+	color: lightgrey;
+}
+td.sim30 {
+	background-color: #222;
+	color: lightgrey;
+}
 
 .fragment_results {
 	width: 100%;
