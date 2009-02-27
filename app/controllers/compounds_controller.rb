@@ -113,14 +113,4 @@ class CompoundsController < ApplicationController
 
 	end
 
-  private
-
-	def authorize_write
-		user = User.find(session[:user_id])
-		if user.workpackages.blank?  
-			flash[:notice] = 'Please login with your workpackage/group leader password:'
-			redirect_to :controller => 'login', :action =>'login'
-		end
-	end
-
 end

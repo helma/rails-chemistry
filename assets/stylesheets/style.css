@@ -86,7 +86,7 @@ body{
 }
 
 #nav ul {
-	margin: 0;
+  margin: 0;
 	padding: 0;
 	list-style-type: none;
 	white-space: nowrap;
@@ -145,7 +145,7 @@ li#sel a {
 	clear: both;
 	margin-top: 4%;
 	padding: 2%;
-	background-color: lightgrey;
+	background-color: #ffffcc;
 	border: solid 1px #555;
   line-height: 150%;
 }

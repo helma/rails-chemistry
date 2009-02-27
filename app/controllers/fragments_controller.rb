@@ -150,5 +150,4 @@ class FragmentsController < ApplicationController
     redirect_to :action => :search
   end
 
-  
 end

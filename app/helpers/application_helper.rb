@@ -18,12 +18,4 @@ module ApplicationHelper
     '<img src="' + url_for(:controller => "compounds", :action => "display_smiles_with_fragments", :smiles => smiles) + '" alt="' + smiles +'"></img>'
   end
 
-  def audited_column(record)
-    if record.audited
-      image_tag "check_mark.png", :alt => "yes", :plugin => :opentox
-    else
-      link_to("<b>--</b>", :action => :audit, :id => record.id)
-    end
-  end
-    
 end

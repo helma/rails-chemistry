@@ -2,29 +2,6 @@ class Compound < ActiveRecord::Base
 
   require 'openbabel'
 
-  has_and_belongs_to_many :experiments
-  has_one :sensitiv_training_compound
-  has_many :treatments
-  has_many :treatments, :as => :solvent
-  #has_many :measurements, :class_name => "GenericData", :as => :sample
-  has_many :generic_datas, :as => :sample
-
-  def treatments
-    Treatment.find(:all, :conditions => "compound_id = #{self.id}")
-  end
-
-  def data_transformations
-    results = []
-    treatments.each do |t|
-      t.generic_datas.each do |d|
-        d.data_transformations.each do |t|
-          results << t.result
-        end
-      end
-    end
-    results.uniq
-  end
-
   def create_inchi
 
     begin
