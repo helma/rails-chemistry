@@ -1,0 +1,36 @@
+<div class="smarts_form">
+  <dl>
+    <dt>Matches</dt>
+    <dd>
+    <% if @chisq > 3.84 %>
+    <% if @activating %>
+    predominatly <b>active</b> compounds (p &lt; 0.05, chi-square <%= sprintf("%0.2f",@chisq) %>)
+
+    <% elsif @dactivating %>
+    predominatly <b>inactive</b> compounds (p &lt; 0.05, chi-square <%= sprintf("%0.2f",@chisq) %>)
+
+    <% end %>
+    <% else %>
+    no significant difference between active and inactive compounds  (p &gt; 0.05, chi-square <%= sprintf("%0.2f",@chisq) %>)
+
+    <% end %>
+    </dd>
+  </dl>
+</div>
+<p/>
+
+<table>
+  <tr>
+    <td>
+<% @category = "actives" %>
+<%= render :partial => "compound_table" %>
+    </td>
+
+
+    <td>
+<% @category = "inactives" %>
+<%= render :partial => "compound_table" %>
+    </td>
+  </tr>
+</table>
+

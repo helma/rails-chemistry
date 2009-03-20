@@ -1,0 +1,45 @@
+<%= javascript_include_tag "jme", :plugin => "opentox" %>
+
+<div class="smarts_form">
+<% form_tag :action => 'search'  do %>
+  <table>
+    <tr>
+      <th><%= link_to 'SMARTS', "http://openbabel.sourceforge.net/wiki/SMARTS" %></th>
+      <td> <%= text_field_tag :smarts, params[:smarts], :size => 40 %> </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <div class="smarts_jme">
+          <applet codebase="/plugin_assets/opentox/applets/" code="JME.class" name="JME" archive="JME.jar" width="512" height="360">
+            <param name="options" value="query"> 
+            <param name="options" value="polarnitro" /> 
+            <% if @molfile %>
+            <param name="mol" value="<%= @molfile %>"/>
+            <% end %>
+          Please enable Java in your browser to use the JME editor.
+          </applet>
+          <br/>
+          Use the "QRY" button to generate complex substructure queries
+          <%= link_to "(help)", "#{$RAILS_DIR}/plugin_assets/opentox/applets/jme_help" %>. <p/>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th> Endpoint (<%= link_to "add", :action => "upload_form" %>) </th>
+      <td>
+        <% if params[:endpoint_id].blank? %>
+          <%= select_tag :endpoint_id, options_from_collection_for_select(LazarModule.find_all_by_prediction_type("classification"), :id, :endpoint) %><p/>
+        <% else %>
+          <%= select_tag :endpoint_id, options_from_collection_for_select(LazarModule.find_all_by_prediction_type("classification"), :id, :endpoint, LazarModule.find(params[:endpoint_id])) %><p/>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th> <%= submit_tag "Search", :onclick => "getsmarts();" %> </th>
+      <td></td>
+    </tr>
+  </table>
+
+<% end %>
+</div>
