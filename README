@@ -1,6 +1,8 @@
 README
 =======
 
+DEPRECATED: This plugin will be substituted by OpenTox (www.opentox.org) components.
+
 These are OpenTox plugin installation instructions for Debian, Ubuntu and Redhat Enterprise Linux.
 
 IMPORTANT! Execute all below commands as superuser (root) from the RAILS_ROOT directory.
